@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import re
+import os
 from bs4 import BeautifulSoup
 import nltk
 from nltk.corpus import stopwords
@@ -15,10 +16,13 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Download necessary NLTK resources
-nltk.download('stopwords')
-nltk.download('wordnet')
-nltk.download('punkt')
+# Ensure NLTK data is downloaded
+nltk_resources = ['punkt', 'stopwords', 'wordnet']
+for resource in nltk_resources:
+    try:
+        nltk.data.find(f'tokenizers/{resource}' if resource == 'punkt' else f'corpora/{resource}')
+    except LookupError:
+        nltk.download(resource)
 
 # Preprocessing function
 stop_words = set(stopwords.words('english'))
