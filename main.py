@@ -17,6 +17,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # ========== Ensure Required NLTK Resources ==========
+
+nltk.download('punkt_tab')
+
 def ensure_nltk_resources():
     resources = {
         "punkt": "tokenizers/punkt",
