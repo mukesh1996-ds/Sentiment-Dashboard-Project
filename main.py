@@ -16,15 +16,22 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Ensure NLTK data is downloaded
-nltk_resources = ['punkt', 'stopwords', 'wordnet']
-for resource in nltk_resources:
-    try:
-        nltk.data.find(f'tokenizers/{resource}' if resource == 'punkt' else f'corpora/{resource}')
-    except LookupError:
-        nltk.download(resource)
+# ========== Ensure Required NLTK Resources ==========
+def ensure_nltk_resources():
+    resources = {
+        "punkt": "tokenizers/punkt",
+        "stopwords": "corpora/stopwords",
+        "wordnet": "corpora/wordnet"
+    }
+    for res_name, res_path in resources.items():
+        try:
+            nltk.data.find(res_path)
+        except LookupError:
+            nltk.download(res_name)
 
-# Preprocessing function
+ensure_nltk_resources()
+
+# Preprocessing
 stop_words = set(stopwords.words('english'))
 lemmatizer = WordNetLemmatizer()
 
@@ -60,7 +67,13 @@ if uploaded_file:
         df.dropna(subset=['reviewText', 'rating'], inplace=True)
         df['label'] = df['rating'].apply(lambda x: 1 if x > 3 else 0)
         df['cleanText'] = df['reviewText'].apply(clean_text)
-        df['tokens'] = df['cleanText'].apply(word_tokenize)
+
+        # ⛑️ Safe tokenizer
+        try:
+            df['tokens'] = df['cleanText'].apply(word_tokenize)
+        except LookupError as e:
+            nltk.download('punkt')
+            df['tokens'] = df['cleanText'].apply(word_tokenize)
 
         vectorizer_type = st.selectbox("Choose Vectorizer", ["TF-IDF", "Bag of Words", "Word2Vec"])
         test_size = st.slider("Test Set Size", 0.1, 0.5, 0.2)
